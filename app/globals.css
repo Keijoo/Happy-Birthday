@@ -1,26 +1,149 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+html, body {
+  background: radial-gradient(circle at center, #fef3c7 0%, #fde68a 60%, #fcd34d 100%);
+  min-height: 100%;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* --- BALLOON FLOATING LAYER --- */
+@keyframes floatUp {
+  0% {
+    transform: translateY(105vh) translateX(0) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(50vh) translateX(var(--bounce-distance, 30px)) scale(1.05) rotate(5deg);
+  }
+  100% {
+    transform: translateY(-15vh) translateX(-20px) scale(0.9) rotate(-10deg);
+    opacity: 0;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.animate-balloon {
+  position: fixed;
+  bottom: -100px;
+  animation: floatUp var(--float-duration, 4s) ease-in-out forwards;
+  z-index: 40;
+}
+
+/* --- BEE SWARMING LAYER --- */
+@keyframes beeFlight {
+  0% {
+    transform: translate(0, 0) scaleX(1);
+  }
+  25% {
+    transform: translate(var(--path-x1, 80px), var(--path-y1, -60px)) scaleX(1);
+  }
+  50% {
+    transform: translate(var(--path-x2, 160px), var(--path-y2, 10px)) scaleX(-1);
+  }
+  75% {
+    transform: translate(var(--path-x3, 60px), var(--path-y3, 80px)) scaleX(-1);
+  }
+  100% {
+    transform: translate(0, 0) scaleX(1);
+  }
+}
+
+.animate-bee {
+  position: absolute;
+  animation: beeFlight var(--bee-speed, 5s) infinite ease-in-out;
+}
+
+/* --- AMBIENT THEMATIC BACKGROUNDS --- */
+
+/* 1. Slow, pulsing golden blur pattern */
+@keyframes shift-honeycomb {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 0.6; }
+  50% { transform: translateY(-3%) scale(1.02); opacity: 0.85; }
+}
+
+/* 2. Shimmering, floating golden pollen particles */
+@keyframes shimmerParticles {
+  0% { transform: translateY(15px); opacity: 0; }
+  10%, 90% { opacity: 0.8; }
+  100% { transform: translateY(-15px); opacity: 0; }
+}
+
+@keyframes honeyDrip {
+  0% { transform: translateY(-18vh) scale(0.85); opacity: 0; }
+  18% { opacity: 1; }
+  45% { transform: translateY(18vh) scale(1.02); }
+  68% { transform: translateY(30vh) scale(0.98); }
+  100% { transform: translateY(44vh) scale(1.05); opacity: 0.95; }
+}
+
+@keyframes honeyRipple {
+  0% { transform: scale(0.75); opacity: 0.25; }
+  30% { opacity: 0.45; }
+  100% { transform: scale(2.7); opacity: 0; }
+}
+
+@keyframes honeyGlow {
+  0%, 100% { transform: scale(1); filter: blur(6px); }
+  50% { transform: scale(1.06); filter: blur(10px); }
+}
+
+.bg-beehive-glade {
+  position: relative;
+  width: 100%;
+  min-height: 100%;
+  overflow: visible;
+  /* Deeper, warmer honey-amber gradient base */
+  background: radial-gradient(circle at center, #fef3c7 0%, #fde68a 60%, #fcd34d 100%);
+}
+
+.bg-honeycomb-pattern {
+  /* Darker amber fill color so hex lines are fully visible against the gradient */
+  background-image: url("data:image/svg+xml,%3Csvg width='52' height='30' viewBox='0 0 52 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23d97706' fill-opacity='0.12' fill-rule='evenodd'%3E%3Cpath d='M26 10H10V0l16 10zm10 10v10h16L36 20zM10 20V10H0l10 10zm10-10l16 10v10L20 10z'/%3E%3C/g%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 52px 30px;
+  background-position: center;
+  animation: shift-honeycomb 20s ease-in-out infinite;
+}
+
+.pollen-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  box-shadow: 0 0 10px 2px #fef08a;
+  opacity: 1;
+  animation: shimmerParticles var(--duration) ease-in-out infinite;
+  animation-delay: var(--delay);
+}
+
+.honey-drip {
+  animation: honeyDrip 1.8s cubic-bezier(.22,1,.36,1) forwards;
+}
+
+.honey-ripple {
+  animation: honeyRipple 1.8s ease-out forwards;
+}
+
+.honey-glow {
+  animation: honeyGlow 2.2s ease-in-out infinite;
+}
+/* --- CUSTOM SCROLLBAR --- */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #fde68a;
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #f59e0b, #d97706);
+  border-radius: 999px;
+  border: 2px solid #fde68a;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #d97706, #b45309);
+}
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #f59e0b #fde68a;
+  
 }
