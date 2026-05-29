@@ -7,6 +7,9 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Happy 30th Birthday! ✨",
   description: "A digital memory box from your favorite people.",
+  icons: {
+    icon: "/favicon.png", 
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
