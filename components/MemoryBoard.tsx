@@ -149,15 +149,17 @@ function Lightbox({ mem, onClose }: { mem: Memory; onClose: () => void }) {
         {/* Photo */}
         {imageUrls.length > 0 && (
           <div className="grid gap-3 p-4 md:p-5 pb-0">
-            {imageUrls.map((src, index) => (
-              <img
-                key={`${src}-${index}`}
-                src={src}
-                alt={`Memory from ${mem.sender_name} ${index + 1}`}
-                className="w-full rounded-2xl object-cover"
-                style={{ maxHeight: 320 }}
-              />
-            ))}
+            {imageUrls.map((src, index) => {
+              const isVideo = /\.(mp4|mov|webm|ogg)$/i.test(src);
+              return isVideo ? (
+                <video key={`${src}-${index}`} src={src} controls playsInline
+                  className="w-full rounded-2xl" style={{ maxHeight: 320 }} />
+              ) : (
+                <img key={`${src}-${index}`} src={src}
+                  alt={`Memory from ${mem.sender_name} ${index + 1}`}
+                  className="w-full rounded-2xl object-cover" style={{ maxHeight: 320 }} />
+              );
+            })}
           </div>
         )}
 
@@ -341,15 +343,19 @@ export default function MemoryBoard() {
               >
                 {imageUrls.length > 0 && (
                   <div className="grid gap-2 p-2">
-                    {imageUrls.slice(0, 2).map((src, index) => (
-                      <img
-                        key={`${src}-${index}`}
-                        src={src}
-                        alt={`Memory from ${mem.sender_name} ${index + 1}`}
-                        className="w-full rounded-xl object-cover pointer-events-none"
-                        style={{ maxHeight: imageUrls.length === 1 ? 220 : 120 }}
-                      />
-                    ))}
+                    {imageUrls.slice(0, 2).map((src, index) => {
+                      const isVideo = /\.(mp4|mov|webm|ogg)$/i.test(src);
+                      return isVideo ? (
+                        <video key={`${src}-${index}`} src={src} muted playsInline
+                          className="w-full rounded-xl object-cover pointer-events-none"
+                          style={{ maxHeight: imageUrls.length === 1 ? 220 : 120 }} />
+                      ) : (
+                        <img key={`${src}-${index}`} src={src}
+                          alt={`Memory from ${mem.sender_name} ${index + 1}`}
+                          className="w-full rounded-xl object-cover pointer-events-none"
+                          style={{ maxHeight: imageUrls.length === 1 ? 220 : 120 }} />
+                      );
+                    })}
                   </div>
                 )}
 
