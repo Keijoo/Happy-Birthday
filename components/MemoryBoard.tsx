@@ -106,7 +106,7 @@ function MusicPlayer() {
   };
   return (
     <>
-      <audio ref={audioRef} src="/song.mp3" preload="auto" />
+      <audio ref={audioRef} src="/Song.mp3" preload="auto" />
       <button onClick={toggle} title={playing ? "Mute music" : "Play music"}
         className={`fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 border-2 ${
           playing ? "bg-amber-400 border-amber-500 hover:bg-amber-500" : "bg-white border-amber-200 hover:border-amber-400"
