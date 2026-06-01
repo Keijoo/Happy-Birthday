@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "../lib/supabase";
 import Image from "next/image";
@@ -14,6 +14,117 @@ type Memory = {
   clip_url: string | null;
   created_at: string;
 };
+
+
+// ── CONFETTI ─────────────────────────────────────────────
+const CONFETTI_COLORS = ["#f59e0b","#fbbf24","#fde68a","#fb7185","#a78bfa","#34d399","#60a5fa","#f472b6"];
+const CONFETTI_SHAPES = ["circle","square","heart","star"];
+
+function useConfetti(trigger: boolean) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    if (!trigger) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const pieces = Array.from({ length: 120 }, () => ({
+      x: Math.random() * canvas.width,
+      y: -20 - Math.random() * 100,
+      vx: (Math.random() - 0.5) * 4,
+      vy: 2 + Math.random() * 4,
+      color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+      shape: CONFETTI_SHAPES[Math.floor(Math.random() * CONFETTI_SHAPES.length)],
+      size: 6 + Math.random() * 8,
+      rotation: Math.random() * Math.PI * 2,
+      rotSpeed: (Math.random() - 0.5) * 0.15,
+      opacity: 1,
+    }));
+    let frame: number;
+    let elapsed = 0;
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      elapsed++;
+      let alive = false;
+      for (const p of pieces) {
+        p.x += p.vx; p.y += p.vy; p.vy += 0.08; p.rotation += p.rotSpeed;
+        if (elapsed > 60) p.opacity -= 0.012;
+        if (p.opacity <= 0 || p.y > canvas.height) continue;
+        alive = true;
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, p.opacity);
+        ctx.fillStyle = p.color;
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rotation);
+        if (p.shape === "circle") { ctx.beginPath(); ctx.arc(0,0,p.size/2,0,Math.PI*2); ctx.fill(); }
+        else if (p.shape === "square") { ctx.fillRect(-p.size/2,-p.size/2,p.size,p.size); }
+        else if (p.shape === "heart") {
+          ctx.beginPath();
+          ctx.moveTo(0,-p.size*0.3);
+          ctx.bezierCurveTo(p.size*0.5,-p.size*0.8,p.size*0.9,p.size*0.1,0,p.size*0.6);
+          ctx.bezierCurveTo(-p.size*0.9,p.size*0.1,-p.size*0.5,-p.size*0.8,0,-p.size*0.3);
+          ctx.fill();
+        } else {
+          ctx.beginPath();
+          for (let j=0;j<5;j++) {
+            const a=(j*Math.PI*2)/5-Math.PI/2; const b=a+Math.PI/5;
+            ctx.lineTo(Math.cos(a)*p.size*0.5,Math.sin(a)*p.size*0.5);
+            ctx.lineTo(Math.cos(b)*p.size*0.2,Math.sin(b)*p.size*0.2);
+          }
+          ctx.closePath(); ctx.fill();
+        }
+        ctx.restore();
+      }
+      if (alive) { frame = requestAnimationFrame(draw); }
+      else { ctx.clearRect(0,0,canvas.width,canvas.height); }
+    };
+    frame = requestAnimationFrame(draw);
+    return () => cancelAnimationFrame(frame);
+  }, [trigger]);
+  return canvasRef;
+}
+
+// ── MUSIC PLAYER ─────────────────────────────────────────
+function MusicPlayer() {
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [playing, setPlaying] = useState(false);
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.volume = 0.35;
+    audio.loop = true;
+    // Autoplay is allowed here because user already clicked the envelope button
+    audio.play().then(() => setPlaying(true)).catch(() => {});
+  }, []);
+  const toggle = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (playing) { audio.pause(); setPlaying(false); }
+    else { audio.play(); setPlaying(true); }
+  };
+  return (
+    <>
+      <audio ref={audioRef} src="/song.mp3" preload="auto" />
+      <button onClick={toggle} title={playing ? "Mute music" : "Play music"}
+        className={`fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 border-2 ${
+          playing ? "bg-amber-400 border-amber-500 hover:bg-amber-500" : "bg-white border-amber-200 hover:border-amber-400"
+        }`}>
+        {playing ? (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <rect x="5" y="4" width="4" height="16" rx="1" fill="white"/>
+            <rect x="15" y="4" width="4" height="16" rx="1" fill="white"/>
+          </svg>
+        ) : (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M8 5.14v14l11-7-11-7z" fill="#f59e0b"/>
+          </svg>
+        )}
+      </button>
+    </>
+  );
+}
 
 function MediaEmbed({ url }: { url: string }) {
   const twitchClip =
@@ -197,6 +308,8 @@ export default function MemoryBoard() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("All");
   const [selected, setSelected] = useState<Memory | null>(null);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const confettiRef = useConfetti(showConfetti);
 
   useEffect(() => {
     supabase
@@ -206,6 +319,7 @@ export default function MemoryBoard() {
       .then(({ data, error }) => {
         if (!error && data) setMemories(data as Memory[]);
         setLoading(false);
+        setTimeout(() => setShowConfetti(true), 300);
       });
   }, []);
 
@@ -226,6 +340,8 @@ export default function MemoryBoard() {
 
   return (
     <div className="w-full relative">
+      <canvas ref={confettiRef} className="fixed inset-0 pointer-events-none z-50" />
+      <MusicPlayer />
 
       {/* ── LIGHTBOX (portal-style overlay) ── */}
       <AnimatePresence>

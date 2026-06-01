@@ -4,6 +4,29 @@ import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 
+
+// Plays a soft sparkle chime using Web Audio API — no files needed
+function playOpenChime() {
+  try {
+    const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+    const notes = [523, 659, 784, 1047]; // C5 E5 G5 C6
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      const t = ctx.currentTime + i * 0.12;
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.18, t + 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
+      osc.start(t);
+      osc.stop(t + 0.5);
+    });
+  } catch {}
+}
+
 interface EnvelopeCardProps {
   onOpen: () => void;
 }
@@ -43,6 +66,7 @@ export default function EnvelopeCard({ onOpen }: EnvelopeCardProps) {
   const handleOpenClick = () => {
     if (isBtnClicked) return;
     setIsBtnClicked(true);
+    playOpenChime();
     setTimeout(() => setShowBees(true), 220);
     setTimeout(() => onOpen(), 900);
   };
