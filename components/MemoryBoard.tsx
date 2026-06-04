@@ -106,7 +106,7 @@ function MusicPlayer() {
   };
   return (
     <>
-      <audio ref={audioRef} src="/Song.mp3" preload="auto" />
+      <audio ref={audioRef} src="/song.mp3" preload="auto" />
       <button onClick={toggle} title={playing ? "Mute music" : "Play music"}
         className={`fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 border-2 ${
           playing ? "bg-amber-400 border-amber-500 hover:bg-amber-500" : "bg-white border-amber-200 hover:border-amber-400"
@@ -264,11 +264,11 @@ function Lightbox({ mem, onClose }: { mem: Memory; onClose: () => void }) {
               const isVideo = /\.(mp4|mov|webm|ogg)$/i.test(src);
               return isVideo ? (
                 <video key={`${src}-${index}`} src={src} controls playsInline
-                  className="w-full rounded-2xl" style={{ maxHeight: 320 }} />
+                  className="w-full rounded-2xl" />
               ) : (
                 <img key={`${src}-${index}`} src={src}
                   alt={`Memory from ${mem.sender_name} ${index + 1}`}
-                  className="w-full rounded-2xl object-cover" style={{ maxHeight: 320 }} />
+                  className="w-full rounded-2xl object-contain" />
               );
             })}
           </div>
@@ -463,13 +463,11 @@ export default function MemoryBoard() {
                       const isVideo = /\.(mp4|mov|webm|ogg)$/i.test(src);
                       return isVideo ? (
                         <video key={`${src}-${index}`} src={src} muted playsInline
-                          className="w-full rounded-xl object-cover pointer-events-none"
-                          style={{ maxHeight: imageUrls.length === 1 ? 220 : 120 }} />
+                          className="w-full rounded-xl object-contain pointer-events-none" />
                       ) : (
                         <img key={`${src}-${index}`} src={src}
                           alt={`Memory from ${mem.sender_name} ${index + 1}`}
-                          className="w-full rounded-xl object-cover pointer-events-none"
-                          style={{ maxHeight: imageUrls.length === 1 ? 220 : 120 }} />
+                          className="w-full rounded-xl object-contain pointer-events-none" />
                       );
                     })}
                   </div>
