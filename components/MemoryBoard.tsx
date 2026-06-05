@@ -373,7 +373,7 @@ export default function MemoryBoard() {
         <HoneycombDeco />
 
         <p className="text-amber-600 text-xs tracking-[0.25em] uppercase font-semibold mb-3">
-          Est. 1994 · Chapter Thirty
+          Est. 1996 · Chapter Thirty
         </p>
         <h1
           className="font-black text-slate-900 leading-none tracking-tighter"
